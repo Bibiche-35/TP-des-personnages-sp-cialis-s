@@ -12,7 +12,7 @@ class PersonnagesManager
   public function add(Personnage $perso)
   {
     // Préparation de la requête d'insertion.
-    $q = $this->_db->prepare('INSERT INTO personnages(nom) VALUES(:nom)');
+    $q = $this->db->prepare('INSERT INTO personnages_v2(nom, type) VALUES(:nom, :type)');
     // Assignation des valeurs pour le nom et le type du personnage.
     $q->bindValue(':nom', $perso->nom());
     $q->bindValue(':type', $perso->type());

@@ -1,11 +1,11 @@
 <?php
 class PersonnagesManager
 {
-  private $_db; // Instance de PDO
+  private $db; // Instance de PDO
   
   public function __construct($db)
   {
-    $this->setDb($db);
+    $this->db = $db;
   }
   
   // Enregistrer un nouveau personnage
@@ -21,7 +21,7 @@ class PersonnagesManager
     
     // Hydratation du personnage passé en paramètre avec assignation de son identifiant et des dégâts initiaux (= 0).
     $perso->hydrate([
-      'id' => $this->_db->lastInsertId(),
+      'id' => $this->db->lastInsertId(),
       'degats' => 0,
       'atout' => 0
     ]);
@@ -32,7 +32,7 @@ class PersonnagesManager
   public function count()
   {
     // Exécute une requête COUNT() et retourne le nombre de résultats retourné.
-    return $this->_db->query('SELECT COUNT(*) FROM personnages_v2')->fetchColumn();
+    return $this->db->query('SELECT COUNT(*) FROM personnages_v2')->fetchColumn();
   }
   
 
@@ -40,7 +40,7 @@ class PersonnagesManager
   public function delete(Personnage $perso)
   {
     // Exécute une requête de type DELETE.
-    $this->_db->exec('DELETE FROM personnages_v2 WHERE id = '.$perso->id());
+    $this->db->exec('DELETE FROM personnages_v2 WHERE id = '.$perso->id());
   }
   
 
@@ -51,12 +51,12 @@ class PersonnagesManager
     if (is_int($info)) // On veut voir si tel personnage ayant pour id $info existe.
     {
       // On exécute alors une requête COUNT() avec une clause WHERE, et on retourne un boolean.
-      return (bool) $this->_db->query('SELECT COUNT(*) FROM personnages_v2 WHERE id = '.$info)->fetchColumn();
+      return (bool) $this->db->query('SELECT COUNT(*) FROM personnages_v2 WHERE id = '.$info)->fetchColumn();
     }
     
     // Sinon c'est qu'on a passé un nom.
     // Exécution d'une requête COUNT() avec une clause WHERE, et retourne un boolean.
-    $q = $this->_db->prepare('SELECT COUNT(*) FROM personnages_v2 WHERE nom = :nom');
+    $q = $this->db->prepare('SELECT COUNT(*) FROM personnages_v2 WHERE nom = :nom');
     $q->execute([':nom' => $info]);
     
     return (bool) $q->fetchColumn();
@@ -69,17 +69,15 @@ class PersonnagesManager
     if (is_int($info))
     {
       // Exécute une requête de type SELECT avec une clause WHERE, et retourne un objet Personnage.
-      $q = $this->_db->query('SELECT id, nom, degats, timeEndormi, type, atout FROM personnages_v2 WHERE id = '.$info);
-      $donnees = $q->fetch(PDO::FETCH_ASSOC);
-      
-      return new Personnage($donnees);
+      $q = $this->db->query('SELECT id, nom, degats, timeEndormi, type, atout FROM personnages_v2 WHERE id = '.$info);
+      $perso = $q->fetch(PDO::FETCH_ASSOC);
     }
+
     // Sinon, on veut récupérer le personnage avec son nom.
     else
-    {
-      
+    {   
       // Exécute une requête de type SELECT avec une clause WHERE, et retourne un objet Personnage.
-      $q = $this->_db->prepare('SELECT id, nom, degats, timeEndormi, type, atout FROM personnages_v2 WHERE nom = :nom');
+      $q = $this->db->prepare('SELECT id, nom, degats, timeEndormi, type, atout FROM personnages_v2 WHERE nom = :nom');
       $q->execute([':nom' => $info]);
     
       $perso = $q->fetch(PDO::FETCH_ASSOC);
@@ -99,7 +97,7 @@ class PersonnagesManager
     // Retourne la liste des personnages dont le nom n'est pas $nom.
     $persos = [];
     
-    $q = $this->_db->prepare('SELECT id, nom, degats, timeEndormi, type atout FROM personnages_v2 WHERE nom <> :nom ORDER BY nom');
+    $q = $this->db->prepare('SELECT id, nom, degats, timeEndormi, type, atout FROM personnages_v2 WHERE nom <> :nom ORDER BY nom');
     $q->execute([':nom' => $nom]);
     
     // Le résultat sera un tableau d'instances de Personnage.
@@ -120,7 +118,7 @@ class PersonnagesManager
   public function update(Personnage $perso)
   {
     // Prépare une requête de type UPDATE.
-    $q = $this->_db->prepare('UPDATE personnages_v2 SET degats = :degats, timeEndormi = :timeEndormi, atout = :atout WHERE id = :id');
+    $q = $this->db->prepare('UPDATE personnages_v2 SET degats = :degats, timeEndormi = :timeEndormi, atout = :atout WHERE id = :id');
     // Assignation des valeurs à la requête.
     $q->bindValue(':degats', $perso->degats(), PDO::PARAM_INT);
     $q->bindValue(':timeEndormi', $perso->timeEndormi(), PDO::PARAM_INT);
@@ -128,10 +126,5 @@ class PersonnagesManager
     $q->bindValue(':id', $perso->id(), PDO::PARAM_INT);
     // Exécution de la requête.
     $q->execute();
-  }
-  
-  public function setDb(PDO $db)
-  {
-    $this->_db = $db;
   }
 }

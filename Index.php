@@ -1,8 +1,8 @@
 <?php
 // Un autoload devra être créé (bien que non indispensable puisqu'il n'y a que deux classes).
-function chargerClasse($classname)
+function chargerClasse($classe)
 {
-  require $classname.'.php';
+  require $classe.'.php';
 }
 
 spl_autoload_register('chargerClasse');
@@ -158,8 +158,28 @@ if (isset($perso)) // Si on utilise un personnage (nouveau ou pas).
         Type : <?= ucfirst($perso->type()) ?><br />
         Nom : <?= htmlspecialchars($perso->nom()) ?><br />
         Dégâts : <?= $perso->degats() ?><br />
+<?php
+// On affiche l'atout du personnage suivant son type.
+switch ($perso->type())
+{
+  case 'magicien' :
+    echo 'Magie : ';
+    break;
+  
+  case 'guerrier' :
+    echo 'Protection : ';
+    break;
+}
 
-        <?php
+echo $perso->atout();
+?>
+      </p>
+    </fieldset>
+    
+    <fieldset>
+      <legend>Qui attaquer ?</legend>
+      <p>
+<?php
 // On récupère tous les personnages par ordre alphabétique, dont le nom est différent de celui de notre personnage (on va pas se frapper nous-même :p).
 $retourPersos = $manager->getList($perso->nom());
 
@@ -178,44 +198,6 @@ else
   else
   {
     foreach ($retourPersos as $unPerso)
-    {
-      echo '<a href="?frapper=', $unPerso->id(), '">', htmlspecialchars($unPerso->nom()), '</a> (dégâts : ', $unPerso->degats(), ' | type : ', $unPerso->type(), ')';
-      
-      // On ajoute un lien pour lancer un sort si le personnage est un magicien.
-      if ($perso->type() == 'magicien')
-      {
-        echo ' | <a href="?ensorceler=', $unPerso->id(), '">Lancer un sort</a>';
-      }
-      
-      echo '<br />';
-    }
-  }
-}
-?>
-
-      </p>
-    </fieldset>
-    
-    <fieldset>
-      <legend>Qui attaquer ?</legend>
-      <p>
-<?php
-// On récupère tous les personnages par ordre alphabétique, dont le nom est différent de celui de notre personnage (on va pas se frapper nous-même :p).
-$retourPersos = $manager->getList($perso->nom());
-
-if (empty($retourPersos))
-{
-  echo 'Personne à frapper !';
-}
-else
-{
-  if ($perso->estEndormi())
-  {
-    echo 'Un magicien vous a endormi ! Vous allez vous réveiller dans ', $perso->reveil(), '.';
-  }
-  else
-  {
-    foreach ($persos as $unPerso)
     {
       echo '<a href="?frapper=', $unPerso->id(), '">', htmlspecialchars($unPerso->nom()), '</a> (dégâts : ', $unPerso->degats(), ' | type : ', $unPerso->type(), ')';
       

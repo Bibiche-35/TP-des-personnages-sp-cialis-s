@@ -1,13 +1,12 @@
 <?php
-// Un autoload devra être créé (bien que non indispensable puisqu'il n'y a que deux classes).
 function chargerClasse($classe)
 {
-  require $classe.'.php';
+  require $classe . '.php';
 }
 
 spl_autoload_register('chargerClasse');
 
-session_start(); // On appelle session_start() APRÈS avoir enregistré l'autoload.
+session_start();
 
 if (isset($_GET['deconnexion']))
 {
@@ -16,20 +15,15 @@ if (isset($_GET['deconnexion']))
   exit();
 }
 
-// Une instance de PDO devra être créée.
-$db = new PDO('mysql:host=localhost;dbname=tp_des_personnages_specialises', 'root', '');
-$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING); // On émet une alerte à chaque fois qu'une requête a échoué.
+$db = new PDO('mysql:host=localhost;dbname=TP_des_personnages_specialises', 'root', '');
+$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
-// Une instance de notre manager devra être créée.
 $manager = new PersonnagesManager($db);
 
 if (isset($_SESSION['perso'])) // Si la session perso existe, on restaure l'objet.
 {
   $perso = $_SESSION['perso'];
 }
-
-
-// Le joueur a cliqué sur Créer ce personnage. Le script devra créer un objetPersonnageen passant au constructeur un tableau contenant une entrée (le nom du personnage). Il faudra ensuite s'assurer que le personnage ait un nom valide et qu'il n'existe pas déjà. Après ces vérifications, l'enregistrement en BDD pourra se faire.
 
 if (isset($_POST['creer']) && isset($_POST['nom'])) // Si on a voulu créer un personnage.
 {
@@ -47,7 +41,7 @@ if (isset($_POST['creer']) && isset($_POST['nom'])) // Si on a voulu créer un p
       $message = 'Le type du personnage est invalide.';
       break;
   }
-
+  
   if (isset($perso)) // Si le type du personnage est valide, on a créé un personnage.
   {
     if (!$perso->nomValide())
@@ -66,8 +60,6 @@ if (isset($_POST['creer']) && isset($_POST['nom'])) // Si on a voulu créer un p
     }
   }
 }
-
-// Le joueur a cliqué sur Utiliser ce personnage. Le script devra vérifier si le personnage existe bien en BDD. Si c'est le cas, on le récupère de la BDD.
 
 elseif (isset($_POST['utiliser']) && isset($_POST['nom'])) // Si on a voulu utiliser un personnage.
 {
@@ -98,7 +90,6 @@ elseif (isset($_GET['frapper'])) // Si on a cliqué sur un personnage pour le fr
     else
     {
       $persoAFrapper = $manager->get((int) $_GET['frapper']);
-      
       $retour = $perso->frapper($persoAFrapper); // On stocke dans $retour les éventuelles erreurs ou messages que renvoie la méthode frapper.
       
       switch ($retour)
@@ -126,7 +117,60 @@ elseif (isset($_GET['frapper'])) // Si on a cliqué sur un personnage pour le fr
         case Personnage::PERSO_ENDORMI :
           $message = 'Vous êtes endormi, vous ne pouvez pas frapper de personnage !';
           break;
+      }
+    }
+  }
+}
 
+elseif (isset($_GET['ensorceler']))
+{
+  if (!isset($perso))
+  {
+    $message = 'Merci de créer un personnage ou de vous identifier.';
+  }
+  
+  else
+  {
+    // Il faut bien vérifier que le personnage est un magicien.
+    if ($perso->type() != 'magicien')
+    {
+      $message = 'Seuls les magiciens peuvent ensorceler des personnages !';
+    }
+    
+    else
+    {
+      if (!$manager->exists((int) $_GET['ensorceler']))
+      {
+        $message = 'Le personnage que vous voulez frapper n\'existe pas !';
+      }
+      
+      else
+      {
+        $persoAEnsorceler = $manager->get((int) $_GET['ensorceler']);
+        $retour = $perso->lancerUnSort($persoAEnsorceler);
+        
+        switch ($retour)
+        {
+          case Personnage::CEST_MOI :
+            $message = 'Mais... pourquoi voulez-vous vous ensorceler ???';
+            break;
+          
+          case Personnage::PERSONNAGE_ENSORCELE :
+            $message = 'Le personnage a bien été ensorcelé !';
+            
+            $manager->update($perso);
+            $manager->update($persoAEnsorceler);
+            
+            break;
+          
+          case Personnage::PAS_DE_MAGIE :
+            $message = 'Vous n\'avez pas de magie !';
+            break;
+          
+          case Personnage::PERSO_ENDORMI :
+            $message = 'Vous êtes endormi, vous ne pouvez pas lancer de sort !';
+            break;
+        }
       }
     }
   }
@@ -135,7 +179,7 @@ elseif (isset($_GET['frapper'])) // Si on a cliqué sur un personnage pour le fr
 <!DOCTYPE html>
 <html>
   <head>
-    <title>TP : Mini jeu de combat - VErsion 2</title>
+    <title>TP : Mini jeu de combat - Version 2</title>
     
     <meta charset="utf-8" />
   </head>
@@ -144,7 +188,7 @@ elseif (isset($_GET['frapper'])) // Si on a cliqué sur un personnage pour le fr
 <?php
 if (isset($message)) // On a un message à afficher ?
 {
-  echo '<p>', $message, '</p>'; // Si oui, on l'affiche.
+  echo '<p>', $message, '</p>'; // Si oui, on l'affiche
 }
 
 if (isset($perso)) // Si on utilise un personnage (nouveau ou pas).
@@ -220,7 +264,7 @@ else
 {
 ?>
     <form action="" method="post">
-    <p>
+      <p>
         Nom : <input type="text" name="nom" maxlength="50" /> <input type="submit" value="Utiliser ce personnage" name="utiliser" /><br />
         Type :
         <select name="type">

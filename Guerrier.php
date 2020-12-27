@@ -1,9 +1,4 @@
 <?php
-
-// 2 nouvelles fonnctionnalités
-// Celle consistant à savoir si un personnage est endormi ou non (nécessaire lorsque ledit personnage voudra en frapper un autre : s'il est endormi, ça ne doit pas être possible).
-// Celle consistant à obtenir la date du réveil du personnage sous la forme « XX heures, YY minutes et ZZ secondes », qui s'affichera dans le cadre d'information du personnage s'il est endormi.
-
 class Guerrier extends Personnage
 {
   public function recevoirDegats()

@@ -1,5 +1,4 @@
 <?php
-
 class Magicien extends Personnage
 {
   public function lancerUnSort(Personnage $perso)

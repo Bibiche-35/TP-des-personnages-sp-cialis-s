@@ -1,7 +1,4 @@
 <?php
-
-// Création de la classe personnage avec tous ses attributs
-
 abstract class Personnage
 {
   protected $atout,
@@ -11,7 +8,7 @@ abstract class Personnage
             $timeEndormi,
             $type;
   
-  const CEST_MOI = 1; // Constante renvoyée par la méthode `frapper` si on se frappe soi-même.
+  const CEST_MOI = 1; // Constante renvoyée par la méthode `frapper` si on se frappe soit-même.
   const PERSONNAGE_TUE = 2; // Constante renvoyée par la méthode `frapper` si on a tué le personnage en le frappant.
   const PERSONNAGE_FRAPPE = 3; // Constante renvoyée par la méthode `frapper` si on a bien frappé le personnage.
   const PERSONNAGE_ENSORCELE = 4; // Constante renvoyée par la méthode `lancerUnSort` (voir classe Magicien) si on a bien ensorcelé un personnage.
@@ -23,7 +20,7 @@ abstract class Personnage
     $this->hydrate($donnees);
     $this->type = strtolower(static::class);
   }
-
+  
   public function estEndormi()
   {
     return $this->timeEndormi > time();
@@ -31,11 +28,11 @@ abstract class Personnage
   
   public function frapper(Personnage $perso)
   {
-    if ($perso->id() == $this->_id)
+    if ($perso->id == $this->id)
     {
       return self::CEST_MOI;
     }
-
+    
     if ($this->estEndormi())
     {
       return self::PERSO_ENDORMI;
@@ -58,23 +55,23 @@ abstract class Personnage
       }
     }
   }
-
+  
   public function nomValide()
   {
-    return !empty($this->_nom);
+    return !empty($this->nom);
   }
   
   public function recevoirDegats()
   {
-    $this->_degats += 5;
+    $this->degats += 5;
     
-    // Si on a 100 de dégâts ou plus, on dit que le personnage a été tué.
-    if ($this->_degats >= 100)
+    // Si on a 100 de dégâts ou plus, on supprime le personnage de la BDD.
+    if ($this->degats >= 100)
     {
       return self::PERSONNAGE_TUE;
     }
     
-    // Sinon, on se contente de dire que le personnage a bien été frappé.
+    // Sinon, on se contente de mettre à jour les dégâts du personnage.
     return self::PERSONNAGE_FRAPPE;
   }
   
@@ -94,9 +91,6 @@ abstract class Personnage
     
     return $heures . ', ' . $minutes . ' et ' . $secondes;
   }
-
-  // GETTERS //
-  
   
   public function atout()
   {
@@ -105,19 +99,19 @@ abstract class Personnage
   
   public function degats()
   {
-    return $this->_degats;
+    return $this->degats;
   }
   
   public function id()
   {
-    return $this->_id;
+    return $this->id;
   }
   
   public function nom()
   {
-    return $this->_nom;
+    return $this->nom;
   }
-
+  
   public function timeEndormi()
   {
     return $this->timeEndormi;
@@ -127,9 +121,7 @@ abstract class Personnage
   {
     return $this->type;
   }
-
-  // SETTERS //
-
+  
   public function setAtout($atout)
   {
     $atout = (int) $atout;
@@ -146,7 +138,7 @@ abstract class Personnage
     
     if ($degats >= 0 && $degats <= 100)
     {
-      $this->_degats = $degats;
+      $this->degats = $degats;
     }
   }
   
@@ -156,7 +148,7 @@ abstract class Personnage
     
     if ($id > 0)
     {
-      $this->_id = $id;
+      $this->id = $id;
     }
   }
   
@@ -164,10 +156,10 @@ abstract class Personnage
   {
     if (is_string($nom))
     {
-      $this->_nom = $nom;
+      $this->nom = $nom;
     }
   }
-
+  
   public function setTimeEndormi($time)
   {
     $this->timeEndormi = (int) $time;
